@@ -121,6 +121,97 @@
         input:checked + .slider { background-color: var(--color-c7); }
         input:checked + .slider:before { transform: translateX(20px); }
 
+        /* =========================
+           MOBILE APP STYLE UPGRADE
+           ========================= */
+        
+        body {
+            padding: 16px;
+        }
+        
+        /* APP BAR STYLE HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-global);
+            z-index: 10;
+            padding: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* SEARCH = MOBILE STYLE */
+        .search-container {
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            border-radius: 14px;
+            padding: 14px 16px 14px 44px;
+            font-size: 0.9rem;
+        }
+        
+        /* GRID MOBILE FEEL */
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        /* CARD = APP TILE */
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        
+        .card:active {
+            transform: scale(0.97);
+        }
+        
+        /* THUMBNAIL = BIG SOFT TILE */
+        .card-thumbnail {
+            height: 80px;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        /* ICON TOGA */
+        .card-thumbnail-logo {
+            width: 34px;
+            height: 34px;
+        }
+        
+        /* TEXT */
+        .report-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        
+        .report-meta {
+            font-size: 0.7rem;
+        }
+        
+        /* BUTTON STYLE MOBILE */
+        .btn-view {
+            border-radius: 12px;
+            font-size: 0.75rem;
+            padding: 8px;
+        }
+        
+        /* BADGE */
+        .class-badge {
+            font-size: 0.65rem;
+            border-radius: 999px;
+            padding: 3px 8px;
+        }
+        
+        /* RESPONSIVE TABLET */
+        @media (min-width: 768px) {
+            .report-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         /* ==========================================================================
            4. SEARCH BAR COMPONENT
            ========================================================================== */
