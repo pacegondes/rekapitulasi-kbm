@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Laporan Excel - Madrasah</title>
+    <style>
+        /* ==========================================================================
+           1. DESIGN SYSTEM & VARIABLE THEMES
+           ========================================================================== */
+        :root {
+            --bg-global: #f0f3f7;
+            --bg-card: #ffffff;
+            --text-main: #212121;
+            --text-muted: #6D7588;
+            --border-card: #e5e7e9;
+            --shadow: 0 1px 6px 0 rgba(49,53,59,0.12);
+            --search-focus: #03AC0E;
+            
+            /* Warna Identitas Kelas (Mode Siang) */
+            --color-c7: #03AC0E; /* Hijau */
+            --color-c8: #0077C2; /* Biru */
+            --color-c9: #D32F2F; /* Merah */
+        }
+
+        [data-theme="dark"] {
+            --bg-global: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #eaeaea;
+            --text-muted: #a0a0a0;
+            --border-card: #333333;
+            --shadow: 0 2px 10px rgba(0,0,0,0.5);
+            --search-focus: #23c52e;
+
+            /* Warna Identitas Kelas (Mode Malam) */
+            --color-c7: #1db927;
+            --color-c8: #2196F3;
+            --color-c9: #EF5350;
+        }
+
+        /* ==========================================================================
+           2. BASE STYLES
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-global);
+            color: var(--text-main);
+            padding: 40px 20px;
+            transition: background-color 0.25s ease;
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ==========================================================================
+           3. HEADER SECTION (With Madrasah Logo)
+           ========================================================================== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .madrasah-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 46px;
+        }
+
+        .theme-switch input { display: none; }
+
+        .slider {
+            background-color: #B2B4B6;
+            bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0;
+            transition: .3s; border-radius: 24px;
+        }
+
+        .slider:before {
+            background-color: #fff; bottom: 3px; content: ""; height: 18px; left: 4px;
+            position: absolute; transition: .3s; width: 18px; border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--color-c7); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* ==========================================================================
+           4. SEARCH BAR COMPONENT
+           ========================================================================== */
+        .search-container {
+            position: relative;
+            margin-bottom: 35px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 45px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--search-focus);
+            box-shadow: 0 0 0 3px rgba(3, 172, 14, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            fill: var(--text-muted);
+            pointer-events: none;
+            width: 18px;
+            height: 18px;
+        }
+
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-card);
+            box-shadow: var(--shadow);
+        }
+
+        /* ==========================================================================
+           5. GRID & CARD COMPONENT
+           ========================================================================== */
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card.hidden {
+            display: none !important;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(49,53,59,0.2);
+        }
+
+        .card-thumbnail {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Background warna dasar per tingkat kelas */
+        .card[data-kelas^="7"] .card-thumbnail { background-color: var(--color-c7); }
+        .card[data-kelas^="8"] .card-thumbnail { background-color: var(--color-c8); }
+        .card[data-kelas^="9"] .card-thumbnail { background-color: var(--color-c9); }
+
+        /* Logo Excel Baru Di Dalam Kartu */
+        .card-thumbnail-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
+        }
+
+        .card-info {
+            padding: 14px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .class-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            align-self: flex-start;
+            color: #ffffff;
+        }
+        
+        .card[data-kelas^="7"] .class-badge { background-color: var(--color-c7); }
+        .card[data-kelas^="8"] .class-badge { background-color: var(--color-c8); }
+        .card[data-kelas^="9"] .class-badge { background-color: var(--color-c9); }
+
+        .report-title {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin-top: 4px;
+        }
+
+        .report-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        .card-action {
+            padding: 0 14px 14px 14px;
+        }
+
+        .btn-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            background-color: transparent;
+            text-decoration: none;
+            padding: 8px 0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .card[data-kelas^="7"] .btn-view { border: 1px solid var(--color-c7); color: var(--color-c7); }
+        .card[data-kelas^="7"] .btn-view:hover { background-color: var(--color-c7); color: #fff; }
+
+        .card[data-kelas^="8"] .btn-view { border: 1px solid var(--color-c8); color: var(--color-c8); }
+        .card[data-kelas^="8"] .btn-view:hover { background-color: var(--color-c8); color: #fff; }
+
+        .card[data-kelas^="9"] .btn-view { border: 1px solid var(--color-c9); color: var(--color-c9); }
+        .card[data-kelas^="9"] .btn-view:hover { background-color: var(--color-c9); color: #fff; }
+        
+        .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        fill: var(--text-muted);
+        pointer-events: none;
+        width: 18px;
+        height: 18px;
+        z-index: 2;
+        /* FIX TAMBAHAN PENTING */
+        display: block;
+        }
+
+        @media (max-width: 768px) {
+        body {
+            padding: 16px 12px;
+        }
+
+        header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            line-height: 1.3;
+        }
+
+        .search-container {
+            max-width: 100%;
+        }
+
+        .search-input {
+            font-size: 0.9rem;
+            padding: 12px 14px 12px 42px;
+        }
+
+        .search-icon {
+            width: 16px;
+            height: 16px;
+            left: 12px;
+        }
+
+        .report-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+
+        .card-thumbnail {
+            height: 90px;
+        }
+
+        .card-info {
+            padding: 12px;
+        }
+
+        .class-badge {
+            font-size: 0.7rem;
+        }
+
+        .report-title {
+            font-size: 0.95rem;
+        }
+
+        .btn-view {
+            font-size: 0.8rem;
+            padding: 10px 0;
+        }
+    }
+
+    html, body {
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+    }
+
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Header Utama dengan Logo Madrasah -->
+        <header>
+            <div class="header-title-area">
+                <img src="https://i.ibb.co.com/1fHCTtJ5/logo.png" alt="Logo Madrasah" class="madrasah-logo">
+                <h1>Daftar Rekapitulasi Laporan Excel</h1>
+            </div>
+            <div class="theme-switch-wrapper">
+                <span>Mode Malam</span>
+                <label class="theme-switch" for="theme-checkbox">
+                    <input type="checkbox" id="theme-checkbox" />
+                    <div class="slider"></div>
+                </label>
+            </div>
+        </header>
+
+        <!-- Kolom Pencarian -->
+        <div class="search-container">
+            <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari rekap kelas (misal: 7a, 8, atau 9g)...">
+        </div>
+
+        <!-- Notifikasi Pencarian Kosong -->
+        <div id="noResults" class="no-results">
+            Data rekapitulasi kelas tidak ditemukan.
+        </div>
+
+        <!-- Container Grid Kartu -->
+        <main class="report-grid" id="reportGrid">
+            
+            <!-- ==================== KELAS 7 (HIJAU) ==================== -->
+            <div class="card" data-kelas="7a">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7A</span><div class="report-title">Rekapitulasi Kelas 7A</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7b">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7B</span><div class="report-title">Rekapitulasi Kelas 7B</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7c">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7C</span><div class="report-title">Rekapitulasi Kelas 7C</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7d">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7D</span><div class="report-title">Rekapitulasi Kelas 7D</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7e">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7E</span><div class="report-title">Rekapitulasi Kelas 7E</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7f">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7F</span><div class="report-title">Rekapitulasi Kelas 7F</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="7g">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 7G</span><div class="report-title">Rekapitulasi Kelas 7G</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+
+            <!-- ==================== KELAS 8 (BIRU) ==================== -->
+            <div class="card" data-kelas="8a">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8A</span><div class="report-title">Rekapitulasi Kelas 8A</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="8b">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8B</span><div class="report-title">Rekapitulasi Kelas 8B</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="8c">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8C</span><div class="report-title">Rekapitulasi Kelas 8C</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="8d">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8D</span><div class="report-title">Rekapitulasi Kelas 8D</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="8e">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8E</span><div class="report-title">Rekapitulasi Kelas 8E</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="8f">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 8F</span><div class="report-title">Rekapitulasi Kelas 8F</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+
+            <!-- ==================== KELAS 9 (MERAH) ==================== -->
+            <div class="card" data-kelas="9a">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9A</span><div class="report-title">Rekapitulasi Kelas 9A</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9b">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9B</span><div class="report-title">Rekapitulasi Kelas 9B</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9c">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9C</span><div class="report-title">Rekapitulasi Kelas 9C</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9d">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9D</span><div class="report-title">Rekapitulasi Kelas 9D</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9e">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9E</span><div class="report-title">Rekapitulasi Kelas 9E</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9f">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9F</span><div class="report-title">Rekapitulasi Kelas 9F</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+            <div class="card" data-kelas="9g">
+                <div class="card-thumbnail"><img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel__2019%E2%80%93present_.svg" alt="Excel" class="card-thumbnail-logo"></div>
+                <div class="card-info"><span class="class-badge">KELAS 9G</span><div class="report-title">Rekapitulasi Kelas 9G</div><div class="report-meta">Format: Excel (.xlsx)</div></div>
+                <div class="card-action"><a href="#" class="btn-view">Lihat Excel</a></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+       6. JAVASCRIPT LOGIC
+       ========================================================================== */ -->
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.card');
+        const noResults = document.getElementById('noResults');
+
+        // Event Pencarian Real-Time
+        searchInput.addEventListener('input', function(e) {
+            const filterText = e.target.value.toLowerCase().trim();
+            let hasVisibleCard = false;
+
+            cards.forEach(card => {
+                const classAttribute = card.getAttribute('data-kelas').toLowerCase();
+                const reportTitle = card.querySelector('.report-title').textContent.toLowerCase();
+
+                if (classAttribute.includes(filterText) || reportTitle.includes(filterText)) {
+                    card.classList.remove('hidden');
+                    hasVisibleCard = true;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (hasVisibleCard) {
+                noResults.style.display = 'none';
+            } else {
+                noResults.style.display = 'block';
+            }
+        });
+
+        // Event Kontrol Tema (Light/Dark Mode)
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html>
